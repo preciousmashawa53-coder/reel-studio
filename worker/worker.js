@@ -20,7 +20,7 @@ export const MODELS = {
     engine: 'Kling O3',
     description: 'Sharp, smooth motion. Best value.',
     endpoint: 'fal-ai/kling-video/o3/standard/text-to-video',
-    durations: [5, 10],
+    durations: [5, 10, 15],
     aspects: ['9:16', '16:9', '1:1'],
     audioOptional: true,
     costPerSecond: (o) => (o.audio ? 0.112 : 0.084),
@@ -37,7 +37,7 @@ export const MODELS = {
     engine: 'Happy Horse 1.1',
     description: 'Top-ranked realism in 1080p, with sound.',
     endpoint: 'alibaba/happy-horse/v1.1/text-to-video',
-    durations: [5, 10],
+    durations: [5, 10, 15],
     aspects: ['9:16', '16:9', '1:1'],
     audioOptional: false,
     costPerSecond: () => 0.18,
@@ -156,7 +156,7 @@ async function generate(request, env) {
   if (prompt.length < 8) return fail(env, 400, 'Describe your video in at least a few words.');
   if (prompt.length > MAX_PROMPT) return fail(env, 400, `Keep your description under ${MAX_PROMPT} characters.`);
   const duration = Number(body.duration);
-  if (!model.durations.includes(duration)) return fail(env, 400, `Length must be ${model.durations.join(' or ')} seconds.`);
+  if (!model.durations.includes(duration)) return fail(env, 400, `Length must be ${model.durations.slice(0, -1).join(', ')} or ${model.durations.at(-1)} seconds.`);
   const aspect = String(body.aspect);
   if (!model.aspects.includes(aspect)) return fail(env, 400, 'Choose a supported video shape.');
   const audio = model.audioOptional ? Boolean(body.audio) : true;
