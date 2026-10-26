@@ -357,7 +357,9 @@ async function createOrder(request, env) {
 
   if (!pack) return fail(env, 400, 'Choose a credit pack.');
   if (name.length < 2 || name.length > 60) return fail(env, 400, 'Enter your name.');
-  if (!EMAIL_PATTERN.test(email) || email.length > 120) return fail(env, 400, 'Enter a valid email address.');
+  if (email && (!EMAIL_PATTERN.test(email) || email.length > 120)) {
+    return fail(env, 400, 'Check your email address, or leave it blank to get your code on WhatsApp.');
+  }
   if (phone.replace(/\D/g, '').length < 9 || phone.length > 16) return fail(env, 400, 'Enter your phone number.');
   if (!/^[A-Z0-9.\-/]{5,40}$/.test(reference)) {
     return fail(env, 400, 'Enter the EcoCash reference from your confirmation message (for example MP261026.1234.A12345).');
@@ -399,12 +401,12 @@ async function createOrder(request, env) {
       title: `${name} paid ${money(pack.price)} for the ${pack.name} pack`,
       lines: [
         `<strong>${escapeHtml(name)}</strong> says they paid <strong>${money(pack.price)}</strong> by EcoCash for the <strong>${pack.name}</strong> pack (${pack.credits} credits) on Reel Studio.`,
-        `EcoCash reference: <strong>${escapeHtml(reference)}</strong><br>Phone: ${escapeHtml(phone)}<br>Email: ${escapeHtml(email)}${order.code ? `<br>Top up existing code: ${order.code}` : ''}`,
+        `EcoCash reference: <strong>${escapeHtml(reference)}</strong><br>Phone: ${escapeHtml(phone)}<br>Email: ${email ? escapeHtml(email) : 'none (send the code on WhatsApp)'}${order.code ? `<br>Top up existing code: ${order.code}` : ''}`,
         `Check that this payment is in your EcoCash messages, then approve it on your admin page${adminUrl ? `: <a href="${adminUrl}">${adminUrl}</a>` : '.'}`,
       ],
     }),
     sendEmail(env, {
-      to: email,
+      to: email || null,
       subject: `We've received your Reel Studio order (${money(pack.price)})`,
       title: `Thank you, ${name}!`,
       lines: [
